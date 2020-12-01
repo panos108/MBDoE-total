@@ -17,7 +17,7 @@ class Bio_reactor_1:
 
         return dt, x0, Lsolver, c_code, shrinking_horizon
 
-    def DAE_system(self):
+    def DAE_system(self, uncertain_parameters=False):
         # Define vectors with names of states
         states     = ['x','n','q']
         nd         = len(states)
@@ -54,9 +54,14 @@ class Bio_reactor_1:
         2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]
 
         nmp       = len(modpar)
-        uncertainty = []#SX.sym('uncp', nmp)
-        for i in range(nmp):
-            globals()[modpar[i]] = SX(modparval[i])# + uncertainty[i])
+        if uncertain_parameters:
+            uncertainty = SX.sym('uncp', nmp)
+            for i in range(nmp):
+                globals()[modpar[i]] = SX(modparval[i] + uncertainty[i])
+        else:
+            uncertainty = []
+            for i in range(nmp):
+                globals()[modpar[i]] = SX(modparval[i])# + uncertainty[i])
 
         # Additive measurement noise
     #    Sigma_v  = [400.,1e5,1e-2]*diag(np.ones(nd))*1e-6
@@ -135,7 +140,7 @@ class Bio_reactor_2:
 
         return dt, x0, Lsolver, c_code, shrinking_horizon
 
-    def DAE_system(self):
+    def DAE_system(self, uncertain_parameters=False):
         # Define vectors with names of states
         states     = ['x','n','q']
         nd         = len(states)
@@ -172,9 +177,14 @@ class Bio_reactor_2:
         2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]
 
         nmp       = len(modpar)
-        uncertainty = []#SX.sym('uncp', nmp)
-        for i in range(nmp):
-            globals()[modpar[i]] = SX(modparval[i])# + uncertainty[i])
+        if uncertain_parameters:
+            uncertainty = SX.sym('uncp', nmp)
+            for i in range(nmp):
+                globals()[modpar[i]] = SX(modparval[i] + uncertainty[i])
+        else:
+            uncertainty = []
+            for i in range(nmp):
+                globals()[modpar[i]] = SX(modparval[i])# + uncertainty[i])
 
         # Additive measurement noise
     #    Sigma_v  = [400.,1e5,1e-2]*diag(np.ones(nd))*1e-6
