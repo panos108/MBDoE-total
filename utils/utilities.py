@@ -9,7 +9,8 @@ import Criteria
 class MBDoE:
 
     def __init__(self, Model_Def, horizon, collocation_degree = 8, penalize_u=False,
-                 ukf=False, theta_unc=None):
+                 ukf=False, theta_unc=None, S_exp = None):
+
         self.NoModels  = len(Model_Def)
         self.Model_def = []
         for i in range(self.NoModels):
@@ -21,19 +22,32 @@ class MBDoE:
         dt, x0, Lsolver, c_code, self.shrinking_horizon = self.Model_def[0].specifications()
         self.dt        = dt
         self.f         = []
+        self.hmeas     = []
+        self.S_theta   = []
         # FIXME Change the DAE to be for all the models
         if ukf:
             for i in range(self.NoModels):
                 xd, _, u, uncertainty, ODEeq, _, self.u_min, self.u_max, self.x_min, self.x_max, _, \
-                _, _, self.nd, _, self.nu, self.n_ref, _, _, self.ng, self.gfcn, \
+                _, _, self.nd, _, self.nu, self.n_ref, self.ntheta, _, self.ng, self.gfcn, \
                 self.Obj_M, self.Obj_L, self.Obj_D, self.R = self.Model_def[i].DAE_system(uncertain_parameters=True) # Define the System
-                self.f += [Function('f1', [xd, u, uncertainty], [vertcat(*ODEeq)])]
+                self.f       += [Function('f1', [xd, u, uncertainty], [vertcat(*ODEeq)])]
+                self.hmeas   += [Function('h1', [xd], [xd])]
+                self.S_theta += [theta_unc[i]]
+
+
         else:
             for i in range(self.NoModels):
                 xd, _, u, uncertainty, ODEeq, _, self.u_min, self.u_max, self.x_min, self.x_max, _, \
-                _, _, self.nd, _, self.nu, self.n_ref, _, _, self.ng, self.gfcn, \
+                _, _, self.nd, _, self.nu, self.n_ref, self.ntheta, _, self.ng, self.gfcn, \
                 self.Obj_M, self.Obj_L, self.Obj_D, self.R = self.Model_def[i].DAE_system() # Define the System
                 self.f += [Function('f1', [xd, u,uncertainty], [vertcat(*ODEeq)])]
+
+        """
+        Define noise and disturbances for the system
+        """
+        self.Q = 1e-7 * np.eye(self.nd)
+        if S_exp == None:
+            self.S_exp = 1e-4 * np.eye(self.nd)
 
         self.penalize_u = penalize_u
 
@@ -86,9 +100,11 @@ class MBDoE:
 
         u_plot  = []
         X_models= []
-        X_0 = SX.sym('p_x', self.nd)  # This is a parameter that defines the Initial Conditions
+        X_0    = SX.sym('p_x'     , self.nd)  # This is a parameter that defines the Initial Conditions
         shrink = SX.sym('p_shrink', self.N)
-        x_ref = SX.sym('p_ref', self.n_ref)
+        x_ref  = SX.sym('p_ref'   , self.n_ref)
+        thetas = SX.sym('p_thetas', self.ntheta * NoModels)
+
         if self.penalize_u:
             U_past  = SX.sym('p_u', self.nu)  #This is a parameter that defines the Initial Conditions
             prev    = U_past
@@ -104,6 +120,22 @@ class MBDoE:
             ubg += [*np.zeros([self.nd])]
             x_plot += [Xk]
             X_his = []
+
+            theta = SX.sym('theta', self.ntheta)
+            w += [theta]
+            lbw += [*(0*np.ones([self.ntheta]))]
+#[*(0.8*np.array( [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
+#                                 2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]))]#[*(0*np.ones([self.ntheta]))]
+            ubw += [*(1000*np.ones([self.ntheta]))]
+                #[*(1.1*np.array( [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
+                #                 2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]))]#[*(500*np.ones([self.ntheta]))]
+            w0 += [*(100*np.ones([self.ntheta]))]
+                #[*(np.array( [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
+                #                 2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]))]
+            g += [theta - thetas[m*self.ntheta:(m+1)*(self.ntheta)]]
+            lbg += [*np.zeros([self.ntheta])]
+            ubg += [*np.zeros([self.ntheta])]
+
             for i in range(N):
             # Formulate the NLP
             # New NLP variable for the control
@@ -123,7 +155,7 @@ class MBDoE:
                 w, lbw, ubw, w0, g, lbg, ubg, Xk, x_plot, _ = self.perform_orthogonal_collocation(dc, self.nd, w, lbw, ubw, w0,
                                                      self.x_min, self.x_max,
                                                      D, Xk, i, C, self.f[m], u_apply[i], dt,
-                                                     g, lbg, ubg, shrink[i], x_plot, B, J, x_ref,[])#F1(x0=Xk, p=Uk, y=yk)#, DT=DTk)
+                                                     g, lbg, ubg, shrink[i], x_plot, B, J, x_ref,theta)#F1(x0=Xk, p=Uk, y=yk)#, DT=DTk)
 
                 for ig in range(self.ng):
                     g   += [self.gfcn(Xk, x_ref,    u_apply[i])[ig]*shrink[i]]
@@ -141,12 +173,15 @@ class MBDoE:
             p += [x_ref]
             p += [U_past]
             p += [shrink]
+            p += [thetas]
             prob = {'f': J, 'x': vertcat(*w),'p': vertcat(*p), 'g': vertcat(*g)}
         else:
             p  = []
             p += [X_0]
             p += [x_ref]
             p += [shrink]
+            p += [thetas]
+
             prob = {'f': J, 'x': vertcat(*w),'p': vertcat(*p), 'g': vertcat(*g)}
 
         trajectories = Function('trajectories', [vertcat(*w)]
@@ -190,6 +225,7 @@ class MBDoE:
 
         u_plot  = []
         X_models= []
+
         X_0 = SX.sym('p_x', self.nd)  # This is a parameter that defines the Initial Conditions
         shrink = SX.sym('p_shrink', self.N)
         x_ref = SX.sym('p_ref', self.n_ref)
@@ -208,6 +244,8 @@ class MBDoE:
             ubg += [*np.zeros([self.nd])]
             x_plot += [Xk]
             X_his = []
+            S       = SX.sym(np.eye(self.nd)*1e-8)
+            S_theta = SX.sym(self.S_theta[m])
             for i in range(N):
             # Formulate the NLP
             # New NLP variable for the control
@@ -224,6 +262,13 @@ class MBDoE:
                     u_apply += [Uk]
 
     # Integrate till the end of the interval
+                auxiliary_vars = dc, self.nd, w, lbw, ubw, w0, \
+                self.x_min, self.x_max, \
+                D, i, C, dt, g, lbg, ubg, \
+                shrink[i], x_plot, B, x_ref
+                self.ukf1(self.f[m], Xk, S, self.thetak[m], S_theta,
+                          self.hmeas[m], self.hmeas[m](Xk), self.Q, self.S_exp, u_apply[i], auxiliary_vars)
+
                 w, lbw, ubw, w0, g, lbg, ubg, Xk, x_plot, _ = self.perform_orthogonal_collocation(
                                                      dc, self.nd, w, lbw, ubw, w0,
                                                      self.x_min, self.x_max,
@@ -266,7 +311,7 @@ class MBDoE:
         return solver, trajectories, w0, lbw, ubw, lbg, ubg
 
 
-    def solve_MPC(self, x, ref=None, u=None, t=0.):
+    def solve_MPC(self, x, thetas, ref=None, u=None, t=0.):
 
         if self.n_ref>0:
             p0 = np.concatenate((x, np.array([ref]).reshape((-1,))))
@@ -285,8 +330,9 @@ class MBDoE:
         if self.penalize_u:
             p0 = np.concatenate((p0,u))
 
-
-        p0 = np.concatenate((p0, shrink))
+        theta          = np.array(thetas)
+        theta_reshaped = np.reshape(theta, self.ntheta*self.NoModels)
+        p0             = np.concatenate((p0, shrink, theta_reshaped))
 
         sol = self.solver(x0=self.w0, lbx=self.lbw, ubx=self.ubw, lbg=self.lbg, ubg=self.ubg,
                      p=p0)
@@ -359,7 +405,14 @@ class MBDoE:
 
         return w, lbw, ubw, w0, g, lbg, ubg, Xk, x_plot, J
 
-    def ukf1(self, fstate, x, S, hmeas, z, Q, R, u):
+    def ukf1(self, fstate, x, S, theta, S_theta, hmeas, z, Q, R, u, auxiliary_vars):
+
+        dc, nd, w, lbw, ubw, w0,\
+        x_min, x_max,\
+        D, i, C, dt,g, lbg, ubg, \
+        shrink, x_plot, B, x_ref = auxiliary_vars
+        x_aug = horzcat(x, theta)
+        S_aug = diagcat(S, S_theta)
 
 
         L = max(np.shape(x))  # 2*len(x)+1
@@ -376,10 +429,13 @@ class MBDoE:
         Wc[0] = Wc[0] + (1 - alpha ** 2 + beta)
         c = np.sqrt(c)
         # S[-4:,-4:]= 0.999**0.5 * S[-4:,-4:]
-        X = self.sigmas(x, S, c)
-        x1, X1, S1, X2 = self.ut(fstate, X, Wm, Wc, n, Q, u)
+        X = self.sigmas(x_aug, S_aug, c)
+
+        x1, X1, S1, X2 = self.ut(fstate, X, Wm, Wc, nd, Q, u)
 
         z1, Z1, S2, Z2 = self.ut(hmeas, X1, Wm, Wc, m, R, u)
+
+
         P12 = X2 @ np.diagflat(Wc) @ Z2.T
         # P12         = mtimes(mtimes(X2,np.diagflat(Wc)),Z2.T)
         K = mtimes(mtimes(P12, pinv(S2)), pinv(S2).T)  # .full()##P12 @np.linalg.pinv(S2)**2

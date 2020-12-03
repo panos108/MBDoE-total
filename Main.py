@@ -4,13 +4,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 Model_bank = [Models.Bio_reactor_1, Models.Bio_reactor_2]
-F = []
+F     = []
+thetas = []
 for i in range(len(Model_bank)):
-    F += [Model_bank[i]().integrator_model()]
+    F     += [Model_bank[i]().integrator_model()]
+    thetas+= [Model_bank[i]().real_parameters]
 
 MPC_ = utilities.MBDoE(Model_bank, 12, penalize_u=False)
 
-u_opt, x_opt, w_opt = MPC_.solve_MPC(np.array([1, 150,0]), t=0.)
+u_opt, x_opt, w_opt = MPC_.solve_MPC(np.array([1, 150,0]), t=0., thetas=thetas)
 u_apply = np.array(u_opt)
 
 X_models   = []
@@ -22,9 +24,9 @@ for j in range(len(Model_bank)):
     X_his_n = np.empty((0,MPC_.nd), int)
 
     for i in range(MPC_.N):
-        x1 = F[j](x0=x0, p=u_apply[:,i])
+        x1 = F[j](x0=x0, p=(np.concatenate((u_apply[:,i], np.array(thetas[j])))))
         x0 = np.array(x1['xf']).reshape((-1,))
-        x0_noisy = x0.copy()*(1+0.05*np.random.randn())
+        x0_noisy = x0.copy()*(1+0.025*np.random.randn())
         X_his = np.vstack((X_his,x0.reshape((1,-1))))
         X_his_n = np.vstack((X_his_n,x0_noisy.reshape((1,-1))))
 

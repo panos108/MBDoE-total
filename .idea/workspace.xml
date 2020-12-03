@@ -13,11 +13,14 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="40">
-              <caret line="2" column="18" lean-forward="true" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />
+            <state relative-caret-position="153">
+              <caret line="17" selection-start-line="17" selection-end-line="17" />
+              <folding>
+                <element signature="e#0#59#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -25,8 +28,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="140">
-              <caret line="240" column="30" selection-start-line="240" selection-start-column="19" selection-end-line="240" selection-end-column="30" />
+            <state relative-caret-position="132">
+              <caret line="134" column="77" lean-forward="true" selection-start-line="133" selection-start-column="31" selection-end-line="134" selection-end-column="77" />
               <folding>
                 <element signature="e#24#42#0" expanded="true" />
               </folding>
@@ -34,21 +37,18 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/utils/utilities.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="143">
-              <caret line="118" column="35" lean-forward="true" selection-start-line="118" selection-start-column="35" selection-end-line="118" selection-end-column="35" />
+            <state relative-caret-position="69">
+              <caret line="131" column="24" selection-start-line="131" selection-start-column="24" selection-end-line="131" selection-end-column="24" />
               <folding>
                 <element signature="e#0#20#0" expanded="true" />
-                <element signature="e#5798#9600#0" />
-                <element signature="e#4954#5952#0" />
+                <element signature="e#6326#10469#0" />
                 <element signature="e#6145#7892#0" />
-                <element signature="e#8694#10128#0" />
                 <element signature="e#10120#10828#0" />
                 <element signature="e#10950#11417#0" />
                 <element signature="e#11471#11639#0" />
-                <element signature="e#7924#9908#0" />
               </folding>
             </state>
           </provider>
@@ -63,7 +63,7 @@
         <entry file="file://$PROJECT_DIR$/Criteria.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="273">
-              <caret line="110" column="22" lean-forward="true" selection-start-line="110" selection-start-column="22" selection-end-line="110" selection-end-column="22" />
+              <caret line="110" column="22" selection-start-line="110" selection-start-column="22" selection-end-line="110" selection-end-column="22" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -97,17 +97,17 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/Criteria.py" />
-        <option value="$PROJECT_DIR$/Main.py" />
         <option value="$PROJECT_DIR$/Models.py" />
+        <option value="$PROJECT_DIR$/Main.py" />
         <option value="$PROJECT_DIR$/utils/utilities.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-9" />
-    <option name="y" value="-9" />
-    <option name="width" value="1938" />
-    <option name="height" value="1176" />
+    <option name="x" value="240" />
+    <option name="y" value="126" />
+    <option name="width" value="1440" />
+    <option name="height" value="765" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -127,6 +127,12 @@
               <item name="MBDoE-total" type="462c0819:PsiDirectoryNode" />
               <item name="utils" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="MBDoE-total" type="b2602c69:ProjectViewProjectNode" />
+              <item name="MBDoE-total" type="462c0819:PsiDirectoryNode" />
+              <item name="utils" type="462c0819:PsiDirectoryNode" />
+              <item name="utilities.py" type="8704e2dd:PyFileNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -134,7 +140,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../Leeds_working_space - ss - Exp ukf" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../PycharmProjects/RL_bioGP" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
@@ -195,7 +201,7 @@
     <editor active="true" />
     <layout>
       <window_info id="Favorites" sideWeight="0.501292" side_tool="true" weight="0.24622716" />
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.498708" visible="true" weight="0.12629071" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.498708" visible="true" weight="0.19301033" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Version Control" />
       <window_info anchor="bottom" id="Python Console" />
@@ -204,7 +210,7 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.32919255" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.33074534" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.48913044" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -218,20 +224,18 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Main.py</url>
-          <line>35</line>
+          <line>37</line>
           <option name="timeStamp" value="17" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Main.py</url>
+          <line>14</line>
+          <option name="timeStamp" value="23" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/Anaconda3/envs/trial/Lib/site-packages/casadi/casadi.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="4842" selection-start-line="4842" selection-end-line="4842" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/utils/OrthogonalCollocation.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -253,24 +257,31 @@
     <entry file="file://$PROJECT_DIR$/Criteria.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="273">
-          <caret line="110" column="22" lean-forward="true" selection-start-line="110" selection-start-column="22" selection-end-line="110" selection-end-column="22" />
+          <caret line="110" column="22" selection-start-line="110" selection-start-column="22" selection-end-line="110" selection-end-column="22" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Main.py">
+    <entry file="file://$USER_HOME$/Anaconda3/envs/trial/Lib/codecs.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="40">
-          <caret line="2" column="18" lean-forward="true" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />
+        <state relative-caret-position="135">
+          <caret line="309" selection-start-line="309" selection-end-line="309" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Anaconda3/envs/trial/Lib/site-packages/casadi/casadi.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="12213" selection-start-line="12213" selection-end-line="12213" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="140">
-          <caret line="240" column="30" selection-start-line="240" selection-start-column="19" selection-end-line="240" selection-end-column="30" />
+        <state relative-caret-position="132">
+          <caret line="134" column="77" lean-forward="true" selection-start-line="133" selection-start-column="31" selection-end-line="134" selection-end-column="77" />
           <folding>
             <element signature="e#24#42#0" expanded="true" />
           </folding>
@@ -279,18 +290,25 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/utils/utilities.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="143">
-          <caret line="118" column="35" lean-forward="true" selection-start-line="118" selection-start-column="35" selection-end-line="118" selection-end-column="35" />
+        <state relative-caret-position="69">
+          <caret line="131" column="24" selection-start-line="131" selection-start-column="24" selection-end-line="131" selection-end-column="24" />
           <folding>
             <element signature="e#0#20#0" expanded="true" />
-            <element signature="e#5798#9600#0" />
-            <element signature="e#4954#5952#0" />
+            <element signature="e#6326#10469#0" />
             <element signature="e#6145#7892#0" />
-            <element signature="e#8694#10128#0" />
             <element signature="e#10120#10828#0" />
             <element signature="e#10950#11417#0" />
             <element signature="e#11471#11639#0" />
-            <element signature="e#7924#9908#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="17" selection-start-line="17" selection-end-line="17" />
+          <folding>
+            <element signature="e#0#59#0" expanded="true" />
           </folding>
         </state>
       </provider>

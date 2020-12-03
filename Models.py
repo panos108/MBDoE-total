@@ -4,7 +4,9 @@ from casadi import *
 
 
 class Bio_reactor_1:
-
+    def __init__(self):
+        self.real_parameters =  [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
+                                 2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]
     def specifications(self):
         ''' Specify Problem parameters '''
         tf              = 240.      # final time
@@ -48,20 +50,20 @@ class Bio_reactor_1:
             globals()[inputs[i]] = u[i]
 
         # Define model parameter names and values
-        modpar    = ['u_m', 'k_s', 'k_i', 'K_N', 'u_d', 'Y_nx', 'k_m', 'k_sq',
-        'k_iq', 'k_d', 'K_Np']
-        modparval = [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
-        2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]
-
-        nmp       = len(modpar)
         if uncertain_parameters:
-            uncertainty = SX.sym('uncp', nmp)
+            modpar = ['u_m', 'k_s', 'k_i', 'K_N', 'u_d', 'Y_nx', 'k_m', 'k_sq',
+                      'k_iq', 'k_d', 'K_Np']
+            nmp = len(modpar)
+            theta = SX.sym("theta", nmp)
             for i in range(nmp):
-                globals()[modpar[i]] = SX(modparval[i] + uncertainty[i])
+                globals()[modpar[i]] = theta[i]
         else:
-            uncertainty = []
+            modpar = ['u_m', 'k_s', 'k_i', 'K_N', 'u_d', 'Y_nx', 'k_m', 'k_sq',
+                      'k_iq', 'k_d', 'K_Np']
+            nmp = len(modpar)
+            theta = SX.sym("theta", nmp)
             for i in range(nmp):
-                globals()[modpar[i]] = SX(modparval[i])# + uncertainty[i])
+                globals()[modpar[i]] = theta[i]
 
         # Additive measurement noise
     #    Sigma_v  = [400.,1e5,1e-2]*diag(np.ones(nd))*1e-6
@@ -102,8 +104,9 @@ class Bio_reactor_1:
         ng = SX.size(gequation)[0]
         gfcn = Function('gfcn', [xd, xa, u], [gequation])
 
-        return xd, xa, u, uncertainty, ODEeq, Aeq, u_min, u_max, x_min, x_max, states,\
-               algebraics, inputs, nd, na, nu, n_ref, nmp, modparval, ng, gfcn, Obj_M, Obj_L, Obj_D, R
+        return xd, xa, u, theta, ODEeq, Aeq, u_min, u_max, x_min, x_max, states,\
+               algebraics, inputs, nd, na, nu, n_ref, nmp, self.real_parameters, ng, gfcn, Obj_M, Obj_L, Obj_D, R
+
 
 
     def integrator_model(self):
@@ -127,7 +130,9 @@ class Bio_reactor_1:
 
 
 class Bio_reactor_2:
-
+    def __init__(self):
+        self.real_parameters =  [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
+                                 2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]
     def specifications(self):
         ''' Specify Problem parameters '''
         tf              = 240.      # final time
@@ -171,22 +176,26 @@ class Bio_reactor_2:
             globals()[inputs[i]] = u[i]
 
         # Define model parameter names and values
-        modpar    = ['u_m', 'k_s', 'k_i', 'K_N', 'u_d', 'Y_nx', 'k_m', 'k_sq',
-        'k_iq', 'k_d', 'K_Np']
-        modparval = [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
-        2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]
 
-        nmp       = len(modpar)
+        #modparval = [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
+        #2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]
+
+
         if uncertain_parameters:
-            uncertainty = SX.sym('uncp', nmp)
+            modpar = ['u_m', 'k_s', 'k_i', 'K_N', 'u_d', 'Y_nx', 'k_m', 'k_sq',
+                      'k_iq', 'k_d', 'K_Np']
+            nmp = len(modpar)
+            theta = SX.sym("theta", nmp)
             for i in range(nmp):
-                globals()[modpar[i]] = SX(modparval[i] + uncertainty[i])
+                globals()[modpar[i]] = theta[i]
         else:
-            uncertainty = []
+            modpar = ['u_m', 'k_s', 'k_i', 'K_N', 'u_d', 'Y_nx', 'k_m', 'k_sq',
+                      'k_iq', 'k_d', 'K_Np']
+            nmp = len(modpar)
+            theta = SX.sym("theta", nmp)
             for i in range(nmp):
-                globals()[modpar[i]] = SX(modparval[i])# + uncertainty[i])
-
-        # Additive measurement noise
+                globals()[modpar[i]] = theta[i]
+         # Additive measurement noise
     #    Sigma_v  = [400.,1e5,1e-2]*diag(np.ones(nd))*1e-6
 
         # Additive disturbance noise
@@ -225,8 +234,8 @@ class Bio_reactor_2:
         ng = SX.size(gequation)[0]
         gfcn = Function('gfcn', [xd, xa, u], [gequation])
 
-        return xd, xa, u, uncertainty, ODEeq, Aeq, u_min, u_max, x_min, x_max, states,\
-               algebraics, inputs, nd, na, nu, n_ref, nmp, modparval, ng, gfcn, Obj_M, Obj_L, Obj_D, R
+        return xd, xa, u, theta, ODEeq, Aeq, u_min, u_max, x_min, x_max, states,\
+               algebraics, inputs, nd, na, nu, n_ref, nmp, self.real_parameters, ng, gfcn, Obj_M, Obj_L, Obj_D, R
 
 
     def integrator_model(self):
