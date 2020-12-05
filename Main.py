@@ -4,15 +4,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 Model_bank = [Models.Bio_reactor_1, Models.Bio_reactor_2]
-F     = []
-thetas = []
+F       = []
+thetas  = []
+S_theta = []
 for i in range(len(Model_bank)):
-    F     += [Model_bank[i]().integrator_model()]
-    thetas+= [Model_bank[i]().real_parameters]
+    F       += [Model_bank[i]().integrator_model()]
+    thetas  += [Model_bank[i]().real_parameters]
+    S_theta += [0.01*np.eye(len(Model_bank[i]().real_parameters))]
 
-MPC_ = utilities.MBDoE(Model_bank, 12, penalize_u=False)
+MPC_ = utilities.MBDoE(Model_bank, 12, penalize_u=False, ukf=True)
 
-u_opt, x_opt, w_opt = MPC_.solve_MPC(np.array([1, 150,0]), t=0., thetas=thetas)
+u_opt, x_opt, w_opt = MPC_.solve_MPC(np.array([1, 150,0]), t=0., thetas=thetas, S_theta=S_theta)
 u_apply = np.array(u_opt)
 
 X_models   = []

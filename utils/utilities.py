@@ -13,6 +13,7 @@ class MBDoE:
 
         self.NoModels  = len(Model_Def)
         self.Model_def = []
+        self.ukf       = ukf
         for i in range(self.NoModels):
             self.Model_def += [Model_Def[i]()]          # Take class of the dynamic system
 
@@ -31,8 +32,8 @@ class MBDoE:
                 _, _, self.nd, _, self.nu, self.n_ref, self.ntheta, _, self.ng, self.gfcn, \
                 self.Obj_M, self.Obj_L, self.Obj_D, self.R = self.Model_def[i].DAE_system(uncertain_parameters=True) # Define the System
                 self.f       += [Function('f1', [xd, u, uncertainty], [vertcat(*ODEeq)])]
-                self.hmeas   += [Function('h1', [xd], [xd])]
-                self.S_theta += [theta_unc[i]]
+                self.hmeas   += [Function('h1', [xd, u], [xd])]
+                # self.S_theta += [theta_unc[i]]
 
 
         else:
@@ -65,8 +66,8 @@ class MBDoE:
         if not(ukf):
             self.MPC_construct()
         else:
-            raise NotImplementedError
 
+            self.MPC_construct_ukf()
 
 
 
@@ -204,9 +205,9 @@ class MBDoE:
         Obj_D: The a discretized objective for each time
         :return:
         """
-        N        = self.N
-        dc       = self.dc
-        dt       = self.dt
+        N = self.N
+        dc = self.dc
+        dt = self.dt
         NoModels = self.NoModels
 
         C, D, B = construct_polynomials_basis(dc, 'radau')
@@ -221,19 +222,44 @@ class MBDoE:
         Ts = []
         t = 0
         # "Lift" initial conditions
-        x_plot  = []
+        x_plot = []
 
-        u_plot  = []
-        X_models= []
-
+        u_plot = []
+        X_models = []
         X_0 = SX.sym('p_x', self.nd)  # This is a parameter that defines the Initial Conditions
-        shrink = SX.sym('p_shrink', self.N)
-        x_ref = SX.sym('p_ref', self.n_ref)
+        shrink   = SX.sym('p_shrink', self.N)
+        x_ref    = SX.sym('p_ref', self.n_ref)
+        thetas   = SX.sym('p_thetas', self.ntheta * NoModels)
+
+        S_thetas = []
+        for m in range(NoModels):
+            S_thetas += [SX.sym('p_S_thetas_'+str(m), self.ntheta * self.ntheta)]
+
         if self.penalize_u:
-            U_past  = SX.sym('p_u', self.nu)  #This is a parameter that defines the Initial Conditions
-            prev    = U_past
+            U_past = SX.sym('p_u', self.nu)  # This is a parameter that defines the Initial Conditions
+            prev = U_past
         u_apply = []
         for m in range(NoModels):
+
+            # Create a square matrix for the S_theta
+
+            S_theta = SX.sym('S_theta', self.ntheta**2)
+            w += [S_theta]
+            lbw += [*(0 * np.ones([self.ntheta**2]))]
+            # [*(0.8*np.array( [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
+            #                                 2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]))]#[*(0*np.ones([self.ntheta]))]
+            ubw += [*(100 * np.ones([self.ntheta**2]))]
+            # [*(1.1*np.array( [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
+            #                 2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]))]#[*(500*np.ones([self.ntheta]))]
+            w0 += [*(50 * np.ones([self.ntheta**2]))]
+            # [*(np.array( [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
+            #                 2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]))]
+            g += [S_theta - S_thetas[m]]
+            lbg += [*np.zeros([self.ntheta**2])]
+            ubg += [*np.zeros([self.ntheta**2])]
+
+            S_theta_reshaped = S_theta.reshape((self.ntheta, self.ntheta))
+
             Xk = SX.sym('X0', self.nd)
             w += [Xk]
             lbw += [*self.x_min]
@@ -244,39 +270,53 @@ class MBDoE:
             ubg += [*np.zeros([self.nd])]
             x_plot += [Xk]
             X_his = []
-            S       = SX.sym(np.eye(self.nd)*1e-8)
-            S_theta = SX.sym(self.S_theta[m])
+
+            theta = SX.sym('theta', self.ntheta)
+            w += [theta]
+            lbw += [*(0 * np.ones([self.ntheta]))]
+            # [*(0.8*np.array( [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
+            #                                 2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]))]#[*(0*np.ones([self.ntheta]))]
+            ubw += [*(1000 * np.ones([self.ntheta]))]
+            # [*(1.1*np.array( [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
+            #                 2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]))]#[*(500*np.ones([self.ntheta]))]
+            w0 += [*(100 * np.ones([self.ntheta]))]
+            # [*(np.array( [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
+            #                 2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]))]
+            g += [theta - thetas[m * self.ntheta:(m + 1) * (self.ntheta)]]
+            lbg += [*np.zeros([self.ntheta])]
+            ubg += [*np.zeros([self.ntheta])]
+            S = SX(0.001*np.eye(self.nd))
             for i in range(N):
-            # Formulate the NLP
-            # New NLP variable for the control
-                if m ==0:
-                    Uk   = SX.sym('U_' + str(i), self.nu)
+                # Formulate the NLP
+                # New NLP variable for the control
+                if m == 0:
+                    Uk = SX.sym('U_' + str(i), self.nu)
                     if self.penalize_u:
-                        J += (Uk-prev).T @ self.R @ (Uk - prev) * shrink[i]
+                        J += (Uk - prev).T @ self.R @ (Uk - prev) * shrink[i]
                         prev = Uk
                     w += [Uk]
                     lbw += [*self.u_min]
                     ubw += [*self.u_max]
                     w0 += [*(self.u_min)]
-                    u_plot  += [Uk]
+                    u_plot += [Uk]
                     u_apply += [Uk]
 
-    # Integrate till the end of the interval
+                # Integrate till the end of the interval
                 auxiliary_vars = dc, self.nd, w, lbw, ubw, w0, \
                 self.x_min, self.x_max, \
                 D, i, C, dt, g, lbg, ubg, \
                 shrink[i], x_plot, B, x_ref
-                self.ukf1(self.f[m], Xk, S, self.thetak[m], S_theta,
-                          self.hmeas[m], self.hmeas[m](Xk), self.Q, self.S_exp, u_apply[i], auxiliary_vars)
 
-                w, lbw, ubw, w0, g, lbg, ubg, Xk, x_plot, _ = self.perform_orthogonal_collocation(
-                                                     dc, self.nd, w, lbw, ubw, w0,
-                                                     self.x_min, self.x_max,
-                                                     D, Xk, i, C, self.f[m], u_apply[i], dt,
-                                                     g, lbg, ubg, shrink[i], x_plot, B, J, x_ref)#F1(x0=Xk, p=Uk, y=yk)#, DT=DTk)
+                if N<0:
+
+                    Xk, S, w, lbw, ubw, w0, g, lbg, ubg, _, x_plot = self.ukf1(self.f[m], Xk, S, theta, S_theta_reshaped,
+                          self.hmeas[m], self.hmeas[m](Xk, u_apply[i]), self.Q, self.S_exp, u_apply[i], auxiliary_vars)
+                else:
+                    Xk, _, w, lbw, ubw, w0, g, lbg, ubg, _, x_plot = self.ukf1(self.f[m], Xk, S, theta, S_theta_reshaped,
+                          self.hmeas[m], self.hmeas[m](Xk, u_apply[i]), self.Q, self.S_exp, u_apply[i], auxiliary_vars)
 
                 for ig in range(self.ng):
-                    g   += [self.gfcn(Xk, x_ref,    u_apply[i])[ig]*shrink[i]]
+                    g   += [self.gfcn(Xk, x_ref, u_apply[i])[ig]*shrink[i]]
                     lbg += [-inf]
                     ubg += [0.]
                 X_his = vertcat(X_his,Xk.T)
@@ -291,13 +331,21 @@ class MBDoE:
             p += [x_ref]
             p += [U_past]
             p += [shrink]
+            p += [thetas]
+            p += [S_thetas]
+
             prob = {'f': J, 'x': vertcat(*w),'p': vertcat(*p), 'g': vertcat(*g)}
         else:
             p  = []
             p += [X_0]
             p += [x_ref]
             p += [shrink]
+            p += [thetas]
+            for i in range(self.NoModels):
+                p += [S_thetas[i]]
+
             prob = {'f': J, 'x': vertcat(*w),'p': vertcat(*p), 'g': vertcat(*g)}
+
 
         trajectories = Function('trajectories', [vertcat(*w)]
                                 , [horzcat(*x_plot), horzcat(*u_plot)], ['w'], ['x','u'])
@@ -310,8 +358,7 @@ class MBDoE:
 
         return solver, trajectories, w0, lbw, ubw, lbg, ubg
 
-
-    def solve_MPC(self, x, thetas, ref=None, u=None, t=0.):
+    def solve_MPC(self, x, thetas, ref=None, u=None, t=0., S_theta=None):
 
         if self.n_ref>0:
             p0 = np.concatenate((x, np.array([ref]).reshape((-1,))))
@@ -333,6 +380,13 @@ class MBDoE:
         theta          = np.array(thetas)
         theta_reshaped = np.reshape(theta, self.ntheta*self.NoModels)
         p0             = np.concatenate((p0, shrink, theta_reshaped))
+
+        # Add the parametric unc in the problem
+        if self.ukf:
+            for i in range(self.NoModels):
+                S_theta_single = S_theta[i].reshape((self.ntheta**2))
+                p0 = np.concatenate((p0, shrink, S_theta_single))
+
 
         sol = self.solver(x0=self.w0, lbx=self.lbw, ubx=self.ubw, lbg=self.lbg, ubg=self.ubg,
                      p=p0)
@@ -411,11 +465,13 @@ class MBDoE:
         x_min, x_max,\
         D, i, C, dt,g, lbg, ubg, \
         shrink, x_plot, B, x_ref = auxiliary_vars
-        x_aug = horzcat(x, theta)
+
+
+        x_aug = vertcat(x, theta)
         S_aug = diagcat(S, S_theta)
 
 
-        L = max(np.shape(x))  # 2*len(x)+1
+        L = max(np.shape(x_aug))  # 2*len(x)+1
         m = z.shape[0]
         alpha = 1e-3
         ki = 0
@@ -431,7 +487,8 @@ class MBDoE:
         # S[-4:,-4:]= 0.999**0.5 * S[-4:,-4:]
         X = self.sigmas(x_aug, S_aug, c)
 
-        x1, X1, S1, X2 = self.ut(fstate, X, Wm, Wc, nd, Q, u)
+        x1, X1, S1, X2, w, lbw, ubw, w0, g, lbg, ubg, Xk, x_plot = self.ut_with_orthogonal_collocation(
+            fstate, X[:self.nd,:], X[self.nd:,:], Wm, Wc, nd, Q, u, auxiliary_vars)
 
         z1, Z1, S2, Z2 = self.ut(hmeas, X1, Wm, Wc, m, R, u)
 
@@ -448,7 +505,7 @@ class MBDoE:
             S1 = self.cholupdate(S1, U[:, i], '-')
         S = S1
 
-        return x, S
+        return x, S, w, lbw, ubw, w0, g, lbg, ubg, Xk, x_plot
 
     def ut(self,f, X, Wm, Wc, n, R, u):
 
@@ -456,14 +513,17 @@ class MBDoE:
         y = SX(np.zeros([n, ]))
         Y = SX(np.zeros([n, L]))
         for k in range(L):
-            Y[:, k] = (f(DM(X[:, k]).full(), DM(u).full()))
+            Y[:, k] = (f((X[:, k]), (u)))
             y += Wm[k] * Y[:, k]
+
+
         Sum_mean_matrix_m = []
         for i in range(L):
             Sum_mean_matrix_m = horzcat(Sum_mean_matrix_m, y)
         Y1 = (Y - Sum_mean_matrix_m)
         res = Y1 @ np.sqrt(np.diagflat(abs(Wc)))
         a = horzcat((Y1 @ sqrt(np.diagflat(abs(Wc))))[:, 1:L], SX(R)).T
+
         _, S = qr(a)
         if Wc[0] < 0:
             S1 = self.cholupdate(S, res[:, 0], '-')
@@ -472,6 +532,44 @@ class MBDoE:
         S = S1
         # P=Y1@np.diagflat(Wc) @ Y1.T+R
         return y, Y, S, Y1
+
+    def ut_with_orthogonal_collocation(self, f, X, theta, Wm, Wc, n, R, u, auxiliary_vars):
+
+
+        dc, nd, w, lbw, ubw, w0,\
+        x_min, x_max,\
+        D, i, C, dt,g, lbg, ubg, \
+        shrink, x_plot, B, x_ref = auxiliary_vars
+
+
+        L = X.shape[1]
+        y = SX(np.zeros([n, ]))
+        Y = SX(np.zeros([n, L]))
+        for k in range(L):
+            w, lbw, ubw, w0, g, lbg, ubg, Xk, x_plot, _ = self.perform_orthogonal_collocation(
+                dc, self.nd, w, lbw, ubw, w0,
+                self.x_min, self.x_max,
+                D, X[:,k], i, C, f, u, dt,
+                g, lbg, ubg, shrink, x_plot, B, 0, x_ref, theta[:,k])  # F1(x0=Xk, p=Uk, y=yk)#, DT=DTk)
+
+            Y[:, k] = Xk
+            y += Wm[k] * Y[:, k]
+
+        Sum_mean_matrix_m = []
+        for i in range(L):
+            Sum_mean_matrix_m = horzcat(Sum_mean_matrix_m, y)
+        Y1 = (Y - Sum_mean_matrix_m)
+        res = Y1 @ np.sqrt(np.diagflat(abs(Wc)))
+        a = horzcat((Y1 @ sqrt(np.diagflat(abs(Wc))))[:, 1:L], SX(R)).T
+
+        _, S = qr(a)
+        if Wc[0] < 0:
+            S1 = self.cholupdate(S, res[:, 0], '-')
+        else:
+            S1 = self.cholupdate(S, res[:, 0], '+')
+        S = S1
+        # P=Y1@np.diagflat(Wc) @ Y1.T+R
+        return y, Y, S, Y1, w, lbw, ubw, w0, g, lbg, ubg, Xk, x_plot
 
     def cholupdate(self,R, x, sign):
         p = max(np.shape(x))
