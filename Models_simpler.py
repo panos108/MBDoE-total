@@ -5,12 +5,11 @@ from casadi import *
 
 class Bio_reactor_1:
     def __init__(self):
-        self.real_parameters =  [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
-                                 2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]
+        self.real_parameters =  [0.0923*0.62, 178.85]
     def specifications(self):
         ''' Specify Problem parameters '''
         tf              = 240.      # final time
-        nk              = 6        # sampling points
+        nk              = 12        # sampling points
         dt              = tf/nk
         x0              = np.array([1.,150.,0.])
         Lsolver         = 'mumps'  #'ma97'  # Linear solver
@@ -51,20 +50,21 @@ class Bio_reactor_1:
 
         # Define model parameter names and values
         if uncertain_parameters:
-            modpar = ['u_m', 'k_s', 'k_i', 'K_N', 'u_d', 'Y_nx', 'k_m', 'k_sq',
-                      'k_iq', 'k_d', 'K_Np']
+            modpar = ['u_m', 'k_s']
             nmp = len(modpar)
             theta = SX.sym("theta", nmp)
             for i in range(nmp):
                 globals()[modpar[i]] = theta[i]
         else:
-            modpar = ['u_m', 'k_s', 'k_i', 'K_N', 'u_d', 'Y_nx', 'k_m', 'k_sq',
-                      'k_iq', 'k_d', 'K_Np']
+            modpar = ['u_m', 'k_s']
             nmp = len(modpar)
             theta = SX.sym("theta", nmp)
             for i in range(nmp):
                 globals()[modpar[i]] = theta[i]
 
+        k_i, K_N, u_d, Y_nx, k_m, k_sq,\
+        k_iq, k_d, K_Np = 447.12, 393.10, 0.001, 504.49,\
+                          2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89
         # Additive measurement noise
     #    Sigma_v  = [400.,1e5,1e-2]*diag(np.ones(nd))*1e-6
 
@@ -100,7 +100,7 @@ class Bio_reactor_1:
         x_min = np.array([0.]*nd)
         x_max = np.array([np.inf]*nd)
         # Define constraint functions g(x) <= 0
-        gequation = vertcat(n - 800.)
+        gequation = vertcat(n - 800.)#n - 800., q - 0.011 * x)
         ng = SX.size(gequation)[0]
         gfcn = Function('gfcn', [xd, xa, u], [gequation])
 
@@ -131,12 +131,11 @@ class Bio_reactor_1:
 
 class Bio_reactor_2:
     def __init__(self):
-        self.real_parameters =  [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
-                                 2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]
+        self.real_parameters =  [0.0923*0.62, 178.85]
     def specifications(self):
         ''' Specify Problem parameters '''
         tf              = 240.      # final time
-        nk              = 6        # sampling points
+        nk              = 12        # sampling points
         dt              = tf/nk
         x0              = np.array([1.,150.,0.])
         Lsolver         = 'mumps'  #'ma97'  # Linear solver
@@ -180,21 +179,22 @@ class Bio_reactor_2:
         #modparval = [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
         #2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]
 
-
         if uncertain_parameters:
-            modpar = ['u_m', 'k_s', 'k_i', 'K_N', 'u_d', 'Y_nx', 'k_m', 'k_sq',
-                      'k_iq', 'k_d', 'K_Np']
+            modpar = ['u_m', 'k_s']
             nmp = len(modpar)
             theta = SX.sym("theta", nmp)
             for i in range(nmp):
                 globals()[modpar[i]] = theta[i]
         else:
-            modpar = ['u_m', 'k_s', 'k_i', 'K_N', 'u_d', 'Y_nx', 'k_m', 'k_sq',
-                      'k_iq', 'k_d', 'K_Np']
+            modpar = ['u_m', 'k_s']
             nmp = len(modpar)
             theta = SX.sym("theta", nmp)
             for i in range(nmp):
                 globals()[modpar[i]] = theta[i]
+
+        k_i, K_N, u_d, Y_nx, k_m, k_sq, \
+        k_iq, k_d, K_Np = 447.12, 393.10, 0.001, 504.49, \
+                          2.544 * 0.62 * 1e-4, 23.51, 800.0, 0.281, 16.89
          # Additive measurement noise
     #    Sigma_v  = [400.,1e5,1e-2]*diag(np.ones(nd))*1e-6
 
@@ -230,7 +230,7 @@ class Bio_reactor_2:
         x_min = np.array([0.]*nd)
         x_max = np.array([np.inf]*nd)
         # Define constraint functions g(x) <= 0
-        gequation = vertcat(n - 800.)
+        gequation = vertcat(n - 800.)#SX(0),SX(0))#
         ng = SX.size(gequation)[0]
         gfcn = Function('gfcn', [xd, xa, u], [gequation])
 

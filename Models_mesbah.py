@@ -3,25 +3,24 @@ import numpy as np
 from casadi import *
 
 
-class Bio_reactor_1:
+class model1:
     def __init__(self):
-        self.real_parameters =  [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
-                                 2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]
+        self.real_parameters = [1., 1., 1.]
+
     def specifications(self):
         ''' Specify Problem parameters '''
-        tf              = 240.      # final time
-        nk              = 6        # sampling points
-        dt              = tf/nk
-        x0              = np.array([1.,150.,0.])
-        Lsolver         = 'mumps'  #'ma97'  # Linear solver
-        c_code          = False    # c_code
+        tf = 2.5  # final time
+        nk = 10  # sampling points
+        dt = tf / nk
+        x0 = np.array([0.95, 0.04])
+        Lsolver = 'mumps'  # 'ma97'  # Linear solver
+        c_code = False  # c_code
         shrinking_horizon = True
-
         return dt, x0, Lsolver, c_code, shrinking_horizon
 
     def DAE_system(self, uncertain_parameters=False):
         # Define vectors with names of states
-        states     = ['x','n','q']
+        states     = ['x1','x2']
         nd         = len(states)
         xd         = SX.sym('xd',nd)
         for i in range(nd):
@@ -43,7 +42,7 @@ class Bio_reactor_1:
 
 
         # Define vectors with banes of input variables
-        inputs     = ['L','Fn']
+        inputs     = ['u']
         nu         = len(inputs)
         u          = SX.sym("u",nu)
         for i in range(nu):
@@ -51,37 +50,23 @@ class Bio_reactor_1:
 
         # Define model parameter names and values
         if uncertain_parameters:
-            modpar = ['u_m', 'k_s', 'k_i', 'K_N', 'u_d', 'Y_nx', 'k_m', 'k_sq',
-                      'k_iq', 'k_d', 'K_Np']
+            modpar = ['p1', 'p2', 'p3']
             nmp = len(modpar)
             theta = SX.sym("theta", nmp)
             for i in range(nmp):
                 globals()[modpar[i]] = theta[i]
         else:
-            modpar = ['u_m', 'k_s', 'k_i', 'K_N', 'u_d', 'Y_nx', 'k_m', 'k_sq',
-                      'k_iq', 'k_d', 'K_Np']
+            modpar = ['p1','p2', 'p3']
             nmp = len(modpar)
             theta = SX.sym("theta", nmp)
             for i in range(nmp):
                 globals()[modpar[i]] = theta[i]
 
-        # Additive measurement noise
-    #    Sigma_v  = [400.,1e5,1e-2]*diag(np.ones(nd))*1e-6
+        dx1  = (p1 + p3)*(x2-1)*x1 + (p2+u)*x2
+        dx2  = p1*(1-x2)*x1-(p2+u)*x2
 
-        # Additive disturbance noise
-    #    Sigma_w  = [400.,1e5,1e-2]*diag(np.ones(nd))*1e-6
 
-        # Initial additive disturbance noise
-    #    Sigma_w0 = [1.,150.**2,0.]*diag(np.ones(nd))*1e-3
-        # Declare ODE equations (use notation as defined above)
-
-        dx   = u_m * L/(L+k_s+L**2./k_i) * x * n/(n+K_N) - u_d*x
-        dn   = - Y_nx*u_m* L/(L+k_s+L**2./k_i) * x * n/(n+K_N)+ Fn
-        dq   = (k_m * L/(L+k_sq+L**2./k_iq) * x - k_d * q/(n+K_Np))# * (sign(499.9999 - n)+1)/2 * (sign(x - 10.0001)+1)/2
-
-              # * (tanh(1000*(500. - n))+1)/2 * (tanh(1000*(x - 10.000))+1)/2# * (sign(499.9999 - n)+1)/2 * (sign(x - 10.0001)+1)/2
-
-        ODEeq =  [dx, dn, dq]
+        ODEeq =  [dx1, dx2]
 
         # Declare algebraic equations
         Aeq = []
@@ -95,12 +80,12 @@ class Bio_reactor_1:
         R           = np.diagflat([3.125e-8, 3.125e-006])                         # Weighting of control penality
 
         # Define control bounds
-        u_min = np.array([120., 0.])
-        u_max = np.array([400., 40.])
+        u_min = np.array([0.])
+        u_max = np.array([5.])
         x_min = np.array([0.]*nd)
         x_max = np.array([np.inf]*nd)
         # Define constraint functions g(x) <= 0
-        gequation = vertcat(n - 800.)
+        gequation = vertcat(SX(0))
         ng = SX.size(gequation)[0]
         gfcn = Function('gfcn', [xd, xa, u], [gequation])
 
@@ -129,16 +114,15 @@ class Bio_reactor_1:
         return F
 
 
-class Bio_reactor_2:
+class model2:
     def __init__(self):
-        self.real_parameters =  [0.0923*0.62, 178.85, 447.12, 393.10, 0.001, 504.49,
-                                 2.544*0.62*1e-4, 23.51, 800.0, 0.281, 16.89]
+        self.real_parameters =  [1., 1., 1.]
     def specifications(self):
         ''' Specify Problem parameters '''
-        tf              = 240.      # final time
-        nk              = 6        # sampling points
+        tf              = 2.5      # final time
+        nk              = 10        # sampling points
         dt              = tf/nk
-        x0              = np.array([1.,150.,0.])
+        x0              = np.array([0.95,0.04])
         Lsolver         = 'mumps'  #'ma97'  # Linear solver
         c_code          = False    # c_code
         shrinking_horizon = True
@@ -147,7 +131,7 @@ class Bio_reactor_2:
 
     def DAE_system(self, uncertain_parameters=False):
         # Define vectors with names of states
-        states     = ['x','n','q']
+        states     = ['x1','x2']
         nd         = len(states)
         xd         = SX.sym('xd',nd)
         for i in range(nd):
@@ -169,7 +153,7 @@ class Bio_reactor_2:
 
 
         # Define vectors with banes of input variables
-        inputs     = ['L','Fn']
+        inputs     = ['u']
         nu         = len(inputs)
         u          = SX.sym("u",nu)
         for i in range(nu):
@@ -182,36 +166,25 @@ class Bio_reactor_2:
 
 
         if uncertain_parameters:
-            modpar = ['u_m', 'k_s', 'k_i', 'K_N', 'u_d', 'Y_nx', 'k_m', 'k_sq',
-                      'k_iq', 'k_d', 'K_Np']
+            modpar = ['p1', 'p2', 'p3']
             nmp = len(modpar)
             theta = SX.sym("theta", nmp)
             for i in range(nmp):
                 globals()[modpar[i]] = theta[i]
         else:
-            modpar = ['u_m', 'k_s', 'k_i', 'K_N', 'u_d', 'Y_nx', 'k_m', 'k_sq',
-                      'k_iq', 'k_d', 'K_Np']
+            modpar = ['p1', 'p2', 'p3']
             nmp = len(modpar)
             theta = SX.sym("theta", nmp)
             for i in range(nmp):
                 globals()[modpar[i]] = theta[i]
-         # Additive measurement noise
-    #    Sigma_v  = [400.,1e5,1e-2]*diag(np.ones(nd))*1e-6
 
-        # Additive disturbance noise
-    #    Sigma_w  = [400.,1e5,1e-2]*diag(np.ones(nd))*1e-6
 
-        # Initial additive disturbance noise
-    #    Sigma_w0 = [1.,150.**2,0.]*diag(np.ones(nd))*1e-3
-        # Declare ODE equations (use notation as defined above)
+        dx1   = p1*(x2-1)*x1 + (p2+u)*x2
+        dx2   = p1*(1-x2)*x1-((p2+u)+p3)*x2
 
-        dx   = u_m * L/(L+k_s) * x * n/(n+K_N) - u_d*x
-        dn   = - Y_nx*u_m* L/(L+k_s) * x * n/(n+K_N)+ Fn
-        dq   = (k_m * L/(L+k_sq) * x - k_d * q/(n+K_Np))# * (sign(499.9999 - n)+1)/2 * (sign(x - 10.0001)+1)/2
 
-              # * (tanh(1000*(500. - n))+1)/2 * (tanh(1000*(x - 10.000))+1)/2# * (sign(499.9999 - n)+1)/2 * (sign(x - 10.0001)+1)/2
 
-        ODEeq =  [dx, dn, dq]
+        ODEeq =  [dx1, dx2]
 
         # Declare algebraic equations
         Aeq = []
@@ -225,12 +198,12 @@ class Bio_reactor_2:
         R           = np.diagflat([3.125e-8, 3.125e-006])                         # Weighting of control penality
 
         # Define control bounds
-        u_min = np.array([120., 0.])
-        u_max = np.array([400., 40.])
-        x_min = np.array([0.]*nd)
+        u_min = np.array([0.])
+        u_max = np.array([5.])
+        x_min = np.array([0]*nd)
         x_max = np.array([np.inf]*nd)
         # Define constraint functions g(x) <= 0
-        gequation = vertcat(n - 800.)
+        gequation = vertcat(SX(0))
         ng = SX.size(gequation)[0]
         gfcn = Function('gfcn', [xd, xa, u], [gequation])
 

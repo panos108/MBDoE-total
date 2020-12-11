@@ -83,6 +83,41 @@ def BF(mu, s2, noise_var=None, pps=None):
         Chem. Eng. Sci. 45(2):477-481
     """
     mu, s2, noise_var, _, n, M, _ = tranformation_checks(mu, s2, noise_var, None)
+    for k in range(n):
+        for i in range(M):
+            s2[i][k] += noise_var
+
+    dc = 0
+    for k in range(n):
+        for i in range(M - 1):
+            for j in range(i + 1, M):
+                A     = (s2[i][k] + s2[j][k])
+                cholA = ca.chol(A)
+                iSij  = ca.pinv(cholA)@ca.pinv(cholA).T
+#                iSij  = ca.inv(s2[i][k] + s2[j][k])
+                t1    = ca.trace(noise_var@ iSij)
+                r1    = mu[i][k,:] - mu[j][k,:]#ca.expand_dims(, 2)
+                t2    = r1 @ iSij @ r1.T
+                dc   += t1 + t2
+    return dc
+
+def BF_numpy(mu, s2, noise_var=None, pps=None):
+    """
+    Buzzi-Ferraris et al.'s design criterion.
+    - Buzzi-Ferraris and Forzatti (1983)
+        Sequential experimental design for model discrimination
+        in the case of multiple responses.
+        Chem. Eng. Sci. 39(1):81-85
+    - Buzzi-Ferraris et al. (1984)
+        Sequential experimental design for model discrimination
+        in the case of multiple responses.
+        Chem. Eng. Sci. 39(1):81-85
+    - Buzzi-Ferraris et al. (1990)
+        An improved version of sequential design criterion for
+        discrimination among rival multiresponse models.
+        Chem. Eng. Sci. 45(2):477-481
+    """
+    mu, s2, noise_var, _, n, M, _ = tranformation_checks(mu, s2, noise_var, None)
 
     s2 += noise_var
     dc = np.zeros(n)
@@ -95,8 +130,37 @@ def BF(mu, s2, noise_var=None, pps=None):
             dc += t1 + t2
     return dc
 
-
 def AW(mu, s2, noise_var=None, pps=None):
+    """
+    Modified Expected Akaike Weights Decision Criterion.
+    - Michalik et al. (2010).
+        Optimal Experimental Design for Discriminating Numerous
+        Model Candidates: The AWDC Criterion.
+        Ind. Eng. Chem. Res. 49:913-919
+    """
+    mu, s2, noise_var, pps, n, M, _ = tranformation_checks(mu, s2, noise_var, None)
+    for k in range(n):
+        for i in range(M):
+            s2[i][k] += noise_var
+
+    Jc = 0
+    for k in range(n):
+        Jt = 0
+        for i in range(M):
+            dc = 0
+            for j in range(M):
+                A     = (s2[i][k])
+                cholA = ca.chol(A)
+                iS  = ca.pinv(cholA)@ca.pinv(cholA).T
+                r1    = mu[i][k,:] - mu[j][k,:]#ca.expand_dims(, 2)
+                t1    = r1 @ iS @ r1.T
+                dc += ca.exp(-0.01 * t1)
+            Jt += 1/dc*pps[i]
+        Jc += (Jt)
+    return Jc#sum((1. / dc) * pps, axis=1)
+
+
+def AW_numpy(mu, s2, noise_var=None, pps=None):
     """
     Modified Expected Akaike Weights Decision Criterion.
     - Michalik et al. (2010).
@@ -108,12 +172,14 @@ def AW(mu, s2, noise_var=None, pps=None):
 
     iS = np.linalg.inv(s2 + noise_var)
     dc = np.zeros((n, M))
-    for i in range(M):
-        for j in range(M):
-            r1 = np.expand_dims(mu[:, i] - mu[:, j], 2)
-            t1 = np.sum(r1 * np.matmul(iS[:, i], r1), axis=(1, 2))
-            dc[:, i] += np.exp(-0.5 * t1)
+    for k in range(n):
+        for i in range(M):
+            for j in range(M):
+                r1 = np.expand_dims(mu[k, i] - mu[:, j], 2)
+                t1 = np.sum(r1 * np.matmul(iS[:, i], r1), axis=(1, 2))
+                dc[k, i] += np.exp(-0.5 * t1)
     return np.sum((1. / dc) * pps, axis=1)
+
 
 
 def JR(mu, s2, noise_var=None, pps=None):
@@ -193,12 +259,12 @@ def tranformation_checks(mu, s2=None, noise_var=None, pps=None):
 
     assert noise_var.shape == (E, E)
     assert np.all(np.diag(noise_var) >= 0.)
-
+    s = []
     """ COVARIANCE """
     if s2 == None:
         s2 = np.zeros((n, M, E, E))
     else:
-        s2 = s2.reshape((n, M, E, E))
+        s2 = s2#.reshape((n, M, E, E))
 
     """ MODEL PROBABILITIES """
     if pps is None:
