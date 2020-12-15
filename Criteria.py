@@ -118,17 +118,25 @@ def BF_numpy(mu, s2, noise_var=None, pps=None):
         Chem. Eng. Sci. 45(2):477-481
     """
     mu, s2, noise_var, _, n, M, _ = tranformation_checks(mu, s2, noise_var, None)
+    for k in range(n):
+        for i in range(M):
+            s2[i][k] += noise_var
 
-    s2 += noise_var
-    dc = np.zeros(n)
-    for i in range(M - 1):
-        for j in range(i + 1, M):
-            iSij = np.linalg.inv(s2[:, i] + s2[:, j])
-            t1 = np.trace(np.matmul(noise_var, iSij), axis1=1, axis2=2)
-            r1 = np.expand_dims(mu[:, i] - mu[:, j], 2)
-            t2 = np.sum(r1 * np.matmul(iSij, r1), axis=(1, 2))
-            dc += t1 + t2
-    return dc
+    dc = 0
+    for k in range(n):
+        for i in range(M - 1):
+            for j in range(i + 1, M):
+                A = (s2[i][k] + s2[j][k])
+                cholA = ca.chol(A)
+                iSij = ca.pinv(cholA) @ ca.pinv(cholA).T
+                #                iSij  = ca.inv(s2[i][k] + s2[j][k])
+                t1 = ca.trace(noise_var @ iSij)
+                r1 = mu[i][k, :] - mu[j][k, :]
+                r1 = r1.reshape((1,-1))# ca.expand_dims(, 2)
+                t2 = r1 @ iSij @ r1.T
+                dc += t1 + t2
+    return np.array(dc)
+
 
 def AW(mu, s2, noise_var=None, pps=None):
     """

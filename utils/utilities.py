@@ -1,5 +1,6 @@
 from casadi import *
 import numpy as np
+import scipy.linalg as scipylinalg
 csfp = os.path.abspath(os.path.dirname(__file__))
 if csfp not in sys.path:
     sys.path.insert(0, csfp)
@@ -643,7 +644,7 @@ class MBDoE:
             X_models += [X_his]
             S_models += [S_his]
 
-        J += -(Criteria.AW(X_models, S_models, self.S_exp)+1e-7)
+        J += -log(Criteria.BF(X_models, S_models, self.S_exp)+1e-7)#(Criteria.AW(X_models, S_models, self.S_exp)+1e-7)
 
         # J+= self.Obj_D(Xk, x_ref,  Uk) * shrink[i]
         # J +=  self.Obj_M(Xk, x_ref,  Uk)
@@ -1133,3 +1134,225 @@ class cosntract_history:
         self.past +=1
 
         return self.history
+
+class Uncertainty_module:
+    def __init__(self, Model_def, sensitivity=False):
+        self.sensitivity = sensitivity
+        dt, _, _, _, _ = Model_def().specifications()
+        x, _, u, theta, ODEeq, _, u_min, u_max, x_min, x_max, _, \
+        _, _, nx, _, nu, n_ref, ntheta, _, ng, gfcn, \
+        Obj_M, Obj_L, Obj_D, R = Model_def().DAE_system(
+            uncertain_parameters=True)  # Define the System
+
+        xdot = vertcat(*ODEeq)
+        x_p = SX.sym('xp', nx * ntheta)
+        if sensitivity:
+            xpdot = []
+            for i in range(ntheta):
+                    xpdot = vertcat(xpdot, jacobian(xdot, x) @ (x_p[nx * i: nx * i + nx])
+                                    + jacobian(xdot, theta)[nx * i: nx * i + nx])
+            f = Function('f', [x, u, theta, x_p], [xdot,  xpdot],
+                                 ['x', 'u', 'theta', 'xp'], ['xdot', 'xpdot'])
+        else:
+
+            f = Function('f', [x, u, theta], [xdot],
+                                 ['x', 'u', 'theta'], ['xdot'])
+
+
+        self.f      = f
+        self.nu     = nu
+        self.nx     = nx
+        self.ntheta = ntheta
+        self.dt     = dt
+
+
+    def integrator_model(self, embedded=True, sensitivity=True):
+        """
+        This function constructs the integrator to be suitable with casadi environment, for the equations of the model
+        and the objective function with variable time step.
+         inputs: model, sizes
+         outputs: F: Function([x, u, dt]--> [xf, obj])
+        """
+        f      = self.f
+        nu     = self.nu
+        nx     = self.nx
+        ntheta = self.ntheta
+        dt     = self.dt
+        M = 4  # RK4 steps per interval
+        DT = dt#.sym('DT')
+        DT1 = DT / M
+        X0 = SX.sym('X0', nx)
+        U = SX.sym('U', nu)
+        theta = SX.sym('theta', ntheta)
+        xp0 = SX.sym('xp', np.shape(X0)[0] * np.shape(theta)[0])
+        X = X0
+        Q = 0
+        G = 0
+        S = xp0
+        if embedded:
+            if sensitivity:
+                xdot, xpdot = f(X, U, theta, xp0)
+                dae = {'x': vertcat(X, xp0), 'p': vertcat(U, theta), 'ode': vertcat(xdot, xpdot)}
+                opts = {'tf': dt}  # interval length
+                F = integrator('F', 'cvodes', dae, opts)
+
+            else:
+                xdot = f(X, U, theta)
+                dae  = {'x': vertcat(X), 'p': vertcat(U, theta), 'ode': vertcat(xdot)}
+                opts = {'tf': dt}  # interval length
+                F = integrator('F', 'cvodes', dae, opts)
+        else:
+            if sensitivity:
+
+                for j in range(M):
+                    k1, k1_a, k1_p = f(X, U, theta, S)
+                    k2, k2_a, k2_p = f(X + DT1 / 2 * k1, U, theta, S + DT1 / 2 * k1_p)
+                    k3, k3_a, k3_p = f(X + DT1 / 2 * k2, U, theta, S + DT1 / 2 * k2_p)
+                    k4, k4_a, k4_p = f(X + DT1 * k3, U, theta, S + DT1 * k3_p)
+                    X = X + DT1 / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
+                    G = G + DT1 / 6 * (k1_a + 2 * k2_a + 2 * k3_a + k4_a)
+                    S = S + DT1 / 6 * (k1_p + 2 * k2_p + 2 * k3_p + k4_p)
+                F = Function('F', [X0, U, theta, xp0], [X, G, S], ['x0', 'p', 'theta', 'xp0'], ['xf', 'g', 'xp'])
+            else:
+                for j in range(M):
+                    k1,_ = f(X, U, theta)
+                    k2,_ = f(X + DT1 / 2 * k1, U, theta)
+                    k3,_ = f(X + DT1 / 2 * k2, U, theta)
+                    k4,_ = f(X + DT1 * k3, U, theta)
+                    X = X + DT1 / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
+                F = Function('F', [X0, vertcat(U, theta)], [X], ['x0', 'p'], ['xf'])
+        self.F = F
+        return F
+
+    def simulate_single_step(self,x0, u, theta, xp0):
+        self.integrator_model(sensitivity=self.sensitivity)
+        Fk = self.F(x0=vertcat(x0, xp0), p=vertcat(u, theta))
+
+        x11 = Fk['xf'][0:self.nx]
+        xp1 = Fk['xf'][self.nx:]
+        return np.array(x11), np.array(xp1)
+
+    def compute_FIM(self, x_initial, u_apply, theta, S_exp, criterion='D', prior = None):
+        if prior is None:
+            prior = 0
+
+        steps = u_apply.shape[1]
+        N_mc = 1
+        Sum_of_FIM = 0
+        for k in range(N_mc):
+            x0 = x_initial
+            xp0 = np.zeros(self.ntheta * self.nx)
+
+            xp_reshaped = xp0.reshape((self.nx, self.ntheta))
+            FIM = xp_reshaped.T @ S_exp @ xp_reshaped + prior
+            for i in range(steps):
+                x11, xp1 = self.simulate_single_step(x0, u_apply[:,i], theta, xp0)
+                x0  = x11
+                xp0 = xp1
+                xp_reshaped = xp0.reshape((self.nx, self.ntheta))
+                FIM += xp_reshaped.T @ np.linalg.pinv(S_exp) @ xp_reshaped
+
+            if criterion == 'D':
+                metric_FIM = log(det(FIM + 1e-8 * np.eye(self.ntheta)))
+            elif criterion == 'A':
+                metric_FIM = trace(FIM)
+
+            else:
+                raise Exception("Sorry, criterion " + criterion + " to be implemented")
+
+            Sum_of_FIM += metric_FIM
+
+        mean_FIM = Sum_of_FIM/N_mc
+        return mean_FIM
+
+
+    def compute_full_path(self, u_opt, N, x0, S0,
+                                             theta, S_theta, z, Q, R):
+
+        u_apply = u_opt.reshape((self.nu, N))
+        x_his = np.array([])
+        S_his = []
+
+        for i in range(N):
+            x1, S1 = self.ukf1_regular(x0, S0, theta, S_theta, z, Q, R, u_apply[:,i])
+            x0     = x1
+            S0     = S1
+            if i == 0:
+                x_his  =x1.T
+
+            else:
+                x_his  = np.vstack((x_his,x1.T))
+            S_his += [S1]
+
+        return x_his, S_his
+
+    def ut_regular(self, X, theta, Wm, Wc, n, u):
+
+        L = X.shape[1]
+        y = (np.zeros([n, ]))
+        Y = (np.zeros([n, L]))
+        for k in range(L):
+            if self.FIM_included:
+                x11, xp1 = self.simulate_single_step(X[:self.nx,k], u, theta[:,k], X[self.nx:,k])
+                Xk = np.hstack((x11, xp1))
+            else:
+                Xk, _ = self.simulate_single_step(X[:self.nx,k], u, theta[:,k], X[self.nx:,k])
+
+            Y[:, k] = Xk.reshape((-1,))
+            y += Wm[k] * Y[:, k]
+        y = y.reshape((-1,1))
+        Sum_mean_matrix_m = []
+        for i in range(L):
+            Sum_mean_matrix_m = horzcat(Sum_mean_matrix_m, y)
+        Y1  = (Y - Sum_mean_matrix_m)
+
+        S   = Wc[0]*(Y[:,[0]]-y)@(Y[:,[0]]-y).T#Y1[:,[0]] @ Y1[:,[0]].T
+        for i in range(1,L):
+            S   += Wc[i]*(Y[:,[i]]-y)@(Y[:,[i]]-y).T#Wc[i]*Y1[:,[i]] @ Y1[:,[i]].T
+        S +=1e-7*(np.eye(self.nx))
+
+
+        return y, Y, S, Y1
+
+
+    def ukf1_regular(self, x, S, theta, S_theta, z, Q, R, u,FIM_included=False):
+        self.FIM_included = FIM_included
+        x     = x.reshape((-1,1))
+        theta = theta.reshape((-1,1))
+        x_aug = np.vstack((x, theta))
+        S_aug = scipylinalg.block_diag(S, S_theta)
+
+
+        L = max(np.shape(x_aug))  # 2*len(x)+1
+        m = z.shape[0]
+        alpha = 1e-3
+        ki = 0
+        beta = 2
+        lambda1 = 3 - L  # L*(alpha**2-1)#alpha**2*(L+ki)-L
+
+        c = L + lambda1
+        Wm = np.zeros(1 + 2 * L)
+        Wm[0] = lambda1 / c
+        Wm[1:] = 0.5 / c + np.zeros([1, 2 * L])
+        Wc = Wm.copy()
+        Wc[0] = Wc[0]# + (1 - alpha ** 2 + beta)
+        #c = np.sqrt(c)
+        # S[-4:,-4:]= 0.999**0.5 * S[-4:,-4:]
+        X = self.sigmas_regular(x_aug, S_aug, c)
+
+        x1, X1, S1, X = self.ut_regular(X[:self.nx,:], X[self.nx:,:], Wm, Wc, self.nx,  u)
+
+
+        return x1, S1
+
+
+
+    def sigmas_regular(self,x, S, c):
+
+        A = scipylinalg.sqrtm(c * S.T)
+        # Y = x[:,np.ones([1,len(x)])]
+        n = x.shape[0]
+        X =  np.hstack((x.reshape((n, 1)), x.reshape((n, 1)) + A, x.reshape((n, 1)) - A))
+        return X
+
+
