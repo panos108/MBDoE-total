@@ -80,6 +80,8 @@ for i in range(1):
     xo       = np.random.rand(8)#np.array([0.0,0.85])#np.array([0.0,0.05])
     obj_model  = systems2.obj_empty#model.objective
     obj_system = functools.partial(models_2_parameters.Objective, x0, thetas, S_theta, uncertainty_calcs)
+    obj_system_combined = functools.partial(models_2_parameters.combined_obj, x0, thetas, S_theta, uncertainty_calcs)
+
 
     cons_model = []# l.WO_obj_ca
     #cons_model.append(model.constraint1)
@@ -101,7 +103,20 @@ for i in range(1):
     cons_system.append(functools.partial( models_2_parameters.Constraint1, x0, thetas, S_theta, uncertainty_calcs,3))
 
     # cons_system.append(plant.constraint_agg_2)
+    import pybobyqa
 
+    np.random.seed(0)
+
+    print("Demonstrate noise in function evaluation:")
+    for i in range(5):
+        print("objfun(x0) = %s" % str(obj_system_combined(xo)))
+    print("")
+
+    # Call Py-BOBYQA
+    lower = np.array([0.0]*8)
+    upper = np.array([1.]*8)
+    soln = pybobyqa.solve(obj_system_combined, xo, bounds=(lower,upper), maxfun=4000, objfun_has_noise=False)#, seek_global_minimum=True)
+    print(soln)
 
     n_iter         = 20
     bounds         = ([[0., 1.]] * 8)#[[0.,1.],[0.,1.]]

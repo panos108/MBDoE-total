@@ -16,21 +16,34 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/example_MBDoE_BO.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1420">
-              <caret line="4" column="36" lean-forward="true" selection-start-line="4" selection-start-column="36" selection-end-line="4" selection-end-column="36" />
+            <state relative-caret-position="-1453">
+              <caret line="48" column="21" lean-forward="true" selection-start-line="48" selection-start-column="14" selection-end-line="48" selection-end-column="21" />
+              <folding>
+                <element signature="e#0#11#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/simulate_results_short_horizon.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="40">
+              <caret line="188" column="48" selection-start-line="180" selection-end-line="201" selection-end-column="12" />
+              <folding>
+                <element signature="e#1#12#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/simulate_results_short_horizon.py">
+        <entry file="file://$PROJECT_DIR$/main_simple.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="162" lean-forward="true" selection-start-line="162" selection-end-line="162" />
+            <state relative-caret-position="269">
+              <caret line="56" selection-start-line="56" selection-end-line="56" />
               <folding>
-                <element signature="e#1#12#0" expanded="true" />
-                <element signature="e#1758#3045#0" />
-                <element signature="e#3085#4368#0" />
+                <element signature="e#0#67#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -39,21 +52,23 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="60">
-              <caret line="21" column="2" selection-start-line="21" selection-start-column="2" selection-end-line="21" selection-end-column="2" />
+            <state relative-caret-position="46">
+              <caret line="64" lean-forward="true" selection-start-line="64" selection-end-line="64" />
               <folding>
                 <element signature="e#0#67#0" expanded="true" />
-                <element signature="e#2814#4098#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/sub_uts_BO/utilities_4_no_model.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="167">
-              <caret line="825" column="24" lean-forward="true" selection-start-line="825" selection-end-line="826" />
+            <state relative-caret-position="33">
+              <caret line="822" selection-start-line="822" selection-end-line="822" />
+              <folding>
+                <element signature="e#21329#21716#0" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -73,8 +88,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/models_BO/models_2_parameters.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="214">
-              <caret line="42" column="16" lean-forward="true" selection-start-line="42" selection-start-column="16" selection-end-line="42" selection-end-column="16" />
+            <state relative-caret-position="93">
+              <caret line="63" column="72" selection-start-line="63" selection-start-column="72" selection-end-line="63" selection-end-column="72" />
               <folding>
                 <element signature="e#0#81#0" expanded="true" />
               </folding>
@@ -85,7 +100,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/sub_uts_BO/systems.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-220">
+            <state relative-caret-position="-14380">
               <caret line="25" selection-start-line="25" selection-end-line="25" />
             </state>
           </provider>
@@ -96,18 +111,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="1200">
               <caret line="60" column="40" selection-start-line="60" selection-start-column="40" selection-end-line="60" selection-end-column="40" />
-              <folding>
-                <element signature="e#24#42#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Models_simpler.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1488">
-              <caret line="145" selection-end-line="259" />
               <folding>
                 <element signature="e#24#42#0" expanded="true" />
               </folding>
@@ -152,6 +155,7 @@
       <find>nk</find>
       <find>construct_opt_ca_with_GPception</find>
       <find>backtra</find>
+      <find>System_Cons_check</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -171,14 +175,14 @@
         <option value="$PROJECT_DIR$/main_simple.py" />
         <option value="$PROJECT_DIR$/Criteria.py" />
         <option value="$PROJECT_DIR$/Models_simpler_short_horizon.py" />
-        <option value="$PROJECT_DIR$/Main.py" />
         <option value="$PROJECT_DIR$/models_BO/models.py" />
         <option value="$PROJECT_DIR$/sub_uts_BO/utilities_4.py" />
-        <option value="$PROJECT_DIR$/models_BO/models_2_parameters.py" />
-        <option value="$PROJECT_DIR$/example_MBDoE_BO.py" />
-        <option value="$PROJECT_DIR$/sub_uts_BO/utilities_4_no_model.py" />
         <option value="$PROJECT_DIR$/utils/utilities.py" />
+        <option value="$PROJECT_DIR$/sub_uts_BO/utilities_4_no_model.py" />
+        <option value="$PROJECT_DIR$/example_MBDoE_BO.py" />
+        <option value="$PROJECT_DIR$/models_BO/models_2_parameters.py" />
         <option value="$PROJECT_DIR$/simulate_results_short_horizon.py" />
+        <option value="$PROJECT_DIR$/Main.py" />
       </list>
     </option>
   </component>
@@ -212,13 +216,6 @@
               <item name="utils" type="462c0819:PsiDirectoryNode" />
               <item name="utilities.py" type="8704e2dd:PyFileNode" />
             </path>
-            <path>
-              <item name="MBDoE-total" type="b2602c69:ProjectViewProjectNode" />
-              <item name="MBDoE-total" type="462c0819:PsiDirectoryNode" />
-              <item name="utils" type="462c0819:PsiDirectoryNode" />
-              <item name="utilities.py" type="8704e2dd:PyFileNode" />
-              <item name="MBDoE" type="dd8bbb05:PyElementNode" />
-            </path>
           </expand>
           <select />
         </subPane>
@@ -230,13 +227,13 @@
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\Panos\OneDrive - University College London\Documents\GitHub\MBDoE-total" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Panos\OneDrive - University College London\Documents\GitHub\MBDoE-total\sub_uts_BO" />
       <recent name="C:\Users\Panos\OneDrive - University College London\Documents\GitHub\MBDoE-total" />
       <recent name="C:\Users\Panos\OneDrive - University College London\Documents\GitHub\MBDoE-total\utils" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Panos\OneDrive - University College London\Documents\GitHub\MBDoE-total" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -252,7 +249,7 @@
     </option>
   </component>
   <component name="RunManager">
-    <configuration name="Main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+    <configuration name="simulate_results_short_horizon" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="MBDoE-total" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -288,11 +285,11 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1295" height="775" extended-state="6" />
+    <frame x="-7" y="-7" width="1295" height="695" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Favorites" order="0" sideWeight="0.5012407" side_tool="true" weight="0.19301033" />
-      <window_info content_ui="combo" id="Project" order="1" sideWeight="0.4987593" visible="true" weight="0.27561557" />
+      <window_info content_ui="combo" id="Project" order="1" sideWeight="0.4987593" visible="true" weight="0.24702145" />
       <window_info id="Structure" order="2" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="0" />
       <window_info anchor="bottom" id="Event Log" order="1" side_tool="true" />
@@ -301,7 +298,7 @@
       <window_info anchor="bottom" id="Find" order="4" />
       <window_info anchor="bottom" id="Version Control" order="5" weight="0.32919255" />
       <window_info anchor="bottom" id="Run" order="6" weight="0.32919255" />
-      <window_info active="true" anchor="bottom" id="Debug" order="7" visible="true" weight="0.48447204" />
+      <window_info active="true" anchor="bottom" id="Debug" order="7" visible="true" weight="0.5141844" />
       <window_info anchor="bottom" id="Cvs" order="8" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="9" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="10" />
@@ -325,18 +322,43 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/example_MBDoE_BO.py</url>
-          <line>149</line>
+          <line>164</line>
           <option name="timeStamp" value="197" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/example_MBDoE_BO.py</url>
-          <line>112</line>
+          <line>127</line>
           <option name="timeStamp" value="207" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/simulate_results_short_horizon.py</url>
-          <line>160</line>
-          <option name="timeStamp" value="213" />
+          <line>394</line>
+          <option name="timeStamp" value="218" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/example_MBDoE_BO.py</url>
+          <line>120</line>
+          <option name="timeStamp" value="219" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/simulate_results_short_horizon.py</url>
+          <line>102</line>
+          <option name="timeStamp" value="221" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Main.py</url>
+          <line>106</line>
+          <option name="timeStamp" value="222" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/simulate_results_short_horizon.py</url>
+          <line>221</line>
+          <option name="timeStamp" value="223" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/simulate_results_short_horizon.py</url>
+          <line>202</line>
+          <option name="timeStamp" value="224" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -400,16 +422,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main_simple.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="441">
-          <caret line="56" selection-start-line="56" selection-end-line="56" />
-          <folding>
-            <element signature="e#0#67#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/Anaconda3/envs/trial/Lib/site-packages/scipy/_lib/_util.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
@@ -431,16 +443,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models_BO/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="124">
-          <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
-          <folding>
-            <element signature="e#0#81#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/models_BO/models.py" />
     <entry file="file://$USER_HOME$/Anaconda3/envs/trial/Lib/codecs.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="56">
@@ -495,41 +498,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models_BO/models_2_parameters.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="214">
-          <caret line="42" column="16" lean-forward="true" selection-start-line="42" selection-start-column="16" selection-end-line="42" selection-end-column="16" />
-          <folding>
-            <element signature="e#0#81#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sub_uts_BO/systems.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-220">
-          <caret line="25" selection-start-line="25" selection-end-line="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/example_MBDoE_BO.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1420">
-          <caret line="4" column="36" lean-forward="true" selection-start-line="4" selection-start-column="36" selection-end-line="4" selection-end-column="36" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="21" column="2" selection-start-line="21" selection-start-column="2" selection-end-line="21" selection-end-column="2" />
-          <folding>
-            <element signature="e#0#67#0" expanded="true" />
-            <element signature="e#2814#4098#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/utils/utilities.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-826">
@@ -540,22 +508,70 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/simulate_results_short_horizon.py">
+    <entry file="file://$PROJECT_DIR$/sub_uts_BO/utilities_4_no_model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="162" lean-forward="true" selection-start-line="162" selection-end-line="162" />
+        <state relative-caret-position="33">
+          <caret line="822" selection-start-line="822" selection-end-line="822" />
           <folding>
-            <element signature="e#1#12#0" expanded="true" />
-            <element signature="e#1758#3045#0" />
-            <element signature="e#3085#4368#0" />
+            <element signature="e#21329#21716#0" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/sub_uts_BO/utilities_4_no_model.py">
+    <entry file="file://$PROJECT_DIR$/sub_uts_BO/systems.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="167">
-          <caret line="825" column="24" lean-forward="true" selection-start-line="825" selection-end-line="826" />
+        <state relative-caret-position="-14380">
+          <caret line="25" selection-start-line="25" selection-end-line="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models_BO/models_2_parameters.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="93">
+          <caret line="63" column="72" selection-start-line="63" selection-start-column="72" selection-end-line="63" selection-end-column="72" />
+          <folding>
+            <element signature="e#0#81#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/example_MBDoE_BO.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1453">
+          <caret line="48" column="21" lean-forward="true" selection-start-line="48" selection-start-column="14" selection-end-line="48" selection-end-column="21" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="46">
+          <caret line="64" lean-forward="true" selection-start-line="64" selection-end-line="64" />
+          <folding>
+            <element signature="e#0#67#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main_simple.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="269">
+          <caret line="56" selection-start-line="56" selection-end-line="56" />
+          <folding>
+            <element signature="e#0#67#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/simulate_results_short_horizon.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="40">
+          <caret line="188" column="48" selection-start-line="180" selection-end-line="201" selection-end-column="12" />
+          <folding>
+            <element signature="e#1#12#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
