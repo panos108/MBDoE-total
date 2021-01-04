@@ -1272,19 +1272,36 @@ class Uncertainty_module:
         u_apply = u_opt.reshape((self.nu, N))
         x_his = np.array([])
         S_his = []
+        if (S_theta == 0).all():
 
-        for i in range(N):
-            x1, S1 = self.ukf1_regular(x0, S0, theta, S_theta, z, Q, R, u_apply[:,i])
-            x0     = x1
-            S0     = S1
-            if i == 0:
-                x_his  =x1.T
+            for i in range(N):
+                # if self.FIM_included:
+                #     x1, xp1 = self.simulate_single_step(x0[:self.nx], u_apply[:,i], theta, x0[self.nx:])
+                #
+                #     x0 = np.hstack((x1, xp1))
+                # else:
+                x1, _ = self.simulate_single_step(x0, u_apply[:,i], theta, x0[self.nx:])
+                x0 = x1
+                if i == 0:
+                    x_his = x1.T
 
-            else:
-                x_his  = np.vstack((x_his,x1.T))
-            S_his += [S1]
+                else:
+                    x_his = np.vstack((x_his, x1.T))
+            return x_his
 
-        return x_his, S_his
+        else:
+            for i in range(N):
+                x1, S1 = self.ukf1_regular(x0, S0, theta, S_theta, z, Q, R, u_apply[:,i])
+                x0     = x1
+                S0     = S1
+                if i == 0:
+                    x_his  =x1.T
+
+                else:
+                    x_his  = np.vstack((x_his,x1.T))
+                S_his += [S1]
+
+            return x_his, S_his
 
     def ut_regular(self, X, theta, Wm, Wc, n, u):
 

@@ -81,8 +81,22 @@ for i in range(1):
     obj_model  = systems2.obj_empty#model.objective
     obj_system = functools.partial(models_2_parameters.Objective, x0, thetas, S_theta, uncertainty_calcs)
     obj_system_combined = functools.partial(models_2_parameters.combined_obj, x0, thetas, S_theta, uncertainty_calcs)
+    thetas_samples = np.random.multivariate_normal(np.array(thetas[0]),
+                                                   np.array(S_theta[0]), 750)
+    obj_system_scenario = functools.partial(models_2_parameters.combined_obj_scenario, x0, thetas, thetas_samples, uncertainty_calcs)
 
+    u_opt = np.array( [1.        , 1.        , 1.        , 1.        , 0.52838263,
+        0.78663703, 0.63832465, 0.69328299])
 
+       #  [0.99999999, 1.        , 0.99999999, 1.        , 1.        ,
+       # 1.        , 0.51554809, 0.99999995])
+
+       #  [1.        , 1.        , 1.        , 1.        , 0.52838263,
+       # 0.78663703, 0.63832465, 0.69328299])
+       #  [0.59895805, 0.45336043, 0.72163113, 0.86737233, 0.98504793,
+       # 0.85326827, 0.0107703 , 0.3626316 ])
+    obj_system_combined(u_opt)
+    obj_system_scenario(u_opt)
     cons_model = []# l.WO_obj_ca
     #cons_model.append(model.constraint1)
     #cons_model.append(model.constraint2)
@@ -115,9 +129,10 @@ for i in range(1):
     # Call Py-BOBYQA
     lower = np.array([0.0]*8)
     upper = np.array([1.]*8)
-    soln = pybobyqa.solve(obj_system_combined, xo, bounds=(lower,upper), maxfun=4000, objfun_has_noise=False)#, seek_global_minimum=True)
-    print(soln)
-
+    # soln = pybobyqa.solve(obj_system_combined, xo, bounds=(lower,upper), maxfun=4000, objfun_has_noise=False)#, seek_global_minimum=True)
+    # print(soln)
+    soln_scenario = pybobyqa.solve(obj_system_scenario, xo, bounds=(lower,upper), maxfun=4000, objfun_has_noise=False)#, seek_global_minimum=True)
+    print(soln_scenario)
     n_iter         = 20
     bounds         = ([[0., 1.]] * 8)#[[0.,1.],[0.,1.]]
     #X              = pickle.load(open('initial_data_bio_12_ca_new.p','rb'))
